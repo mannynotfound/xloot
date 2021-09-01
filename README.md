@@ -1,20 +1,20 @@
-# dhof-loot
+# characters for loot
 
-Launch tweet for [LOOT](https://twitter.com/dhof/status/1431316631934967815).
+Launch tweet for [Characters](https://twitter.com/LootCharacters/status/1432857732512681984).
 
-<img src="https://pbs.twimg.com/media/E90OnuPX0AAUXG8?format=png&name=medium" width="300">
+<img src="https://pbs.twimg.com/media/E-KuA8XWQAAnKKW?format=png&name=900x900" width="300">
 
 ## Distribution
 
-- tokenIds `1` to `7778` claimable by user.
-- tokenIds `7778` to `8000` claimable by contract owner.
-- Each token has attributes: `chest`, `foot`, `hand`, `head`, `neck`, `ring`, `waist`, `weapon`.
+- tokenIds `1` to `8000` claimable by loot owners.
+- tokenIds `8001` to `12000` claimable by anyone.
+- Each token has attributes: `race`, `profession`, `strength`, `dexterity`, `intelligence`, `vitality`, `luck`, `faith`.
 
 ## Output
 
-- `output/loot.json` contains all tokenIds and their attributes.
+- `output/characters.json` contains all tokenIds and their attributes.
 - `output/occurences.json` contains the number of occurences by attribute.
-- `output/rare.json` contains a mapping of `lootId` to `score` (which is the sum of number of occcrences of each child attribute for a `lootId`), sorted ascending by `score`. It also includes `rarest` which is how rare the loot bags attributes are (`1` == `rarest`, `8000` == `least rare`).
+- `output/rare.json` contains a mapping of `characterId` to `score` (which is the sum of number of occcrences of each child attribute for a `characterId`), sorted ascending by `score`. It also includes `rarest` which is how rare the character's attributes are (`1` == `rarest`, `12000` == `least rare`).
 - `output/images.json` contains the base64 encoded SVG of each tokenId
 
 ## Run locally
@@ -23,7 +23,7 @@ Launch tweet for [LOOT](https://twitter.com/dhof/status/1431316631934967815).
 # Install dependencies
 npm install
 
-# Collect all loot
+# Collect all characters
 npm run collect
 
 # Parse statistics
@@ -35,4 +35,5 @@ npm run images
 
 ## Credits
 
+- forked from [@Anish-Agnihotri](https://github.com/Anish-Agnihotri/dhof-loot)
 - [@ktasbas](https://github.com/ktasbas) for adding base64 encoded SVG retrieval support

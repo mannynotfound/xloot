@@ -4,46 +4,86 @@ const ethers = require("ethers");
 const { abi } = require("./abi");
 
 // Setup contract
-const lootAddress = "0xFF9C1b15B16263C61d017ee9F65C50e4AE0113D7";
+const charactersAddress = "0x7403AC30DE7309a0bF019cdA8EeC034a5507cbB3";
 const rpc = new ethers.providers.JsonRpcProvider("http://localhost:8545");
-const loot = new ethers.Contract(lootAddress, abi, rpc);
+const characters = new ethers.Contract(charactersAddress, abi, rpc);
+
+const missing = [];
+let existing = [];
+try {
+  const data = fs.readFileSync("./output/characters.json");
+  existing = JSON.parse(data);
+} catch (e) {}
+
+let characterMap = {};
+
+for (let i = 1; i <= 12000; i++) {
+  const exists = existing.find((e) => {
+    const tokenId = Object.keys(e)[0];
+    return tokenId === String(i);
+  });
+
+  if (!exists) {
+    missing.push(i);
+  } else {
+    characterMap[String(i)] = exists[String(i)];
+  }
+}
 
 (async () => {
-  // In-mem retrieval
-  let retrievedLoot = [];
-
-  // Collect 1...8000 ids
-  for (let i = 1; i <= 8000; i++) {
+  const collect = async (i) => {
     console.log("Collecting: ", i);
 
-    // Collect parts
-    const [chest, foot, hand, head, neck, ring, waist, weapon] =
-      await Promise.all([
-        loot.getChest(i),
-        loot.getFoot(i),
-        loot.getHand(i),
-        loot.getHead(i),
-        loot.getNeck(i),
-        loot.getRing(i),
-        loot.getWaist(i),
-        loot.getWeapon(i),
-      ]);
+    const handleError = (err) => {
+      console.log(err);
+    };
+
+    const [
+      race,
+      profession,
+      strength,
+      dexterity,
+      intelligence,
+      vitality,
+      luck,
+      faith,
+    ] = await Promise.all([
+      characters.getRace(i).catch(handleError),
+      characters.getProfession(i).catch(handleError),
+      characters.getStrength(i).catch(handleError),
+      characters.getDexterity(i).catch(handleError),
+      characters.getIntelligence(i).catch(handleError),
+      characters.getVitality(i).catch(handleError),
+      characters.getLuck(i).catch(handleError),
+      characters.getFaith(i).catch(handleError),
+    ]).catch();
 
     // Push parts to array
-    retrievedLoot.push({
-      [i]: {
-        chest,
-        foot,
-        hand,
-        head,
-        neck,
-        ring,
-        waist,
-        weapon,
-      },
-    });
+    return {
+      race,
+      profession,
+      strength,
+      dexterity,
+      intelligence,
+      vitality,
+      luck,
+      faith,
+    };
+  };
+
+  // Collect all ids we need
+  for (let i = 0; i <= missing.length - 1; i++) {
+    const tokenId = missing[i];
+    const tokenData = await collect(tokenId);
+    characterMap[String(tokenId)] = tokenData;
   }
 
   // Write output
-  fs.writeFileSync("./output/loot.json", JSON.stringify(retrievedLoot));
+  const output = Object.keys(characterMap).map((tid) => {
+    const newObj = {};
+    newObj[tid] = { ...characterMap[tid] };
+    return newObj;
+  });
+
+  fs.writeFileSync("./output/characters.json", JSON.stringify(output));
 })();
