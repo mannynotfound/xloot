@@ -4,20 +4,20 @@ const ethers = require("ethers");
 const { abi } = require("./abi");
 
 // Setup contract
-const charactersAddress = "0x7403AC30DE7309a0bF019cdA8EeC034a5507cbB3";
+const xLootAddress = "0x8bf2f876E2dCD2CAe9C3d272f325776c82DA366d";
 const rpc = new ethers.providers.JsonRpcProvider("http://localhost:8545");
-const characters = new ethers.Contract(charactersAddress, abi, rpc);
+const xLoot = new ethers.Contract(xLootAddress, abi, rpc);
 
 (async () => {
   // List to hold images
   let images = [];
 
-  for (let i = 1; i <= 12000; i++) {
+  for (let i = 8001; i <= 16000; i++) {
     console.log("Collecting: ", i);
 
     try {
       // Get base64 encoded URI
-      let uri = await characters.tokenURI(i);
+      let uri = await xLoot.tokenURI(i);
       uri = uri.split(",")[1];
 
       // Decode into a JSON string
@@ -30,7 +30,7 @@ const characters = new ethers.Contract(charactersAddress, abi, rpc);
       const image = JSON.parse(json_uri)["image"];
 
       images.push({
-        [i]: {
+        [8001 + i]: {
           image,
         },
       });

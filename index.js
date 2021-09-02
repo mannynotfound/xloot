@@ -4,20 +4,20 @@ const ethers = require("ethers");
 const { abi } = require("./abi");
 
 // Setup contract
-const charactersAddress = "0x7403AC30DE7309a0bF019cdA8EeC034a5507cbB3";
+const xlootAddress = "0x8bf2f876E2dCD2CAe9C3d272f325776c82DA366d";
 const rpc = new ethers.providers.JsonRpcProvider("http://localhost:8545");
-const characters = new ethers.Contract(charactersAddress, abi, rpc);
+const xLoot = new ethers.Contract(xlootAddress, abi, rpc);
 
 const missing = [];
 let existing = [];
 try {
-  const data = fs.readFileSync("./output/characters.json");
+  const data = fs.readFileSync("./output/xloot.json");
   existing = JSON.parse(data);
 } catch (e) {}
 
-let characterMap = {};
+let lootMap = {};
 
-for (let i = 1; i <= 12000; i++) {
+for (let i = 8001; i <= 16000; i++) {
   const exists = existing.find((e) => {
     const tokenId = Object.keys(e)[0];
     return tokenId === String(i);
@@ -26,7 +26,7 @@ for (let i = 1; i <= 12000; i++) {
   if (!exists) {
     missing.push(i);
   } else {
-    characterMap[String(i)] = exists[String(i)];
+    lootMap[String(i)] = exists[String(i)];
   }
 }
 
@@ -38,36 +38,28 @@ for (let i = 1; i <= 12000; i++) {
       console.log(err);
     };
 
-    const [
-      race,
-      profession,
-      strength,
-      dexterity,
-      intelligence,
-      vitality,
-      luck,
-      faith,
-    ] = await Promise.all([
-      characters.getRace(i).catch(handleError),
-      characters.getProfession(i).catch(handleError),
-      characters.getStrength(i).catch(handleError),
-      characters.getDexterity(i).catch(handleError),
-      characters.getIntelligence(i).catch(handleError),
-      characters.getVitality(i).catch(handleError),
-      characters.getLuck(i).catch(handleError),
-      characters.getFaith(i).catch(handleError),
-    ]).catch();
+    const [chest, foot, hand, head, neck, ring, waist, weapon] =
+      await Promise.all([
+        xLoot.getChest(i).catch(handleError),
+        xLoot.getFoot(i).catch(handleError),
+        xLoot.getHand(i).catch(handleError),
+        xLoot.getHead(i).catch(handleError),
+        xLoot.getNeck(i).catch(handleError),
+        xLoot.getRing(i).catch(handleError),
+        xLoot.getWaist(i).catch(handleError),
+        xLoot.getWeapon(i).catch(handleError),
+      ]).catch();
 
     // Push parts to array
     return {
-      race,
-      profession,
-      strength,
-      dexterity,
-      intelligence,
-      vitality,
-      luck,
-      faith,
+      chest,
+      foot,
+      hand,
+      head,
+      neck,
+      ring,
+      waist,
+      weapon,
     };
   };
 
@@ -75,15 +67,15 @@ for (let i = 1; i <= 12000; i++) {
   for (let i = 0; i <= missing.length - 1; i++) {
     const tokenId = missing[i];
     const tokenData = await collect(tokenId);
-    characterMap[String(tokenId)] = tokenData;
+    lootMap[String(tokenId)] = tokenData;
   }
 
   // Write output
-  const output = Object.keys(characterMap).map((tid) => {
+  const output = Object.keys(lootMap).map((tid) => {
     const newObj = {};
-    newObj[tid] = { ...characterMap[tid] };
+    newObj[tid] = { ...lootMap[tid] };
     return newObj;
   });
 
-  fs.writeFileSync("./output/characters.json", JSON.stringify(output));
+  fs.writeFileSync("./output/xloot.json", JSON.stringify(output));
 })();
